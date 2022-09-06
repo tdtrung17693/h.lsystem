@@ -1,0 +1,3 @@
+angle 90
+axiom F
+F -> F+F-F-F+F

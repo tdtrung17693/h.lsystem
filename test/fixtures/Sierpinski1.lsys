@@ -1,0 +1,4 @@
+angle 120
+axiom X(1)-F(1)-F(1)
+X(l) -> Y(l/2)-F(l/2)+Y(l/2)+F(l/2)-Y(l/2)
+Y(l) -> [F(l)]X(l)
