@@ -1,0 +1,4 @@
+angle 60
+axiom F(1)
+
+F(i)->F(i/3)+F(i/3)--F(i/3)+F(i/3)

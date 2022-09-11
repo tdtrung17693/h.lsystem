@@ -27,20 +27,24 @@ data Token =
     | TId String
     | TSym String
     | TSep
+    | TComma
     deriving (Show, Eq)
 type TokenPos = (Token, SourcePos)
 lex :: String -> Either ParseError [TokenPos]
-lex str = (runParser ((spaces *> (manyTill (token) eof ))) () "") processedStr
+lex str = (runParser ((spaces *> (manyTill (tok) eof ))) () "") processedStr
     where processedStr = (unlines nonBlankLines)
           nonBlankLines = filter (not . all isSpace) $ lines str
 
-token :: Parsec String st TokenPos
-token = 
+tok :: Parsec String st TokenPos
+tok = 
     (,) <$> (tSep <|>
     (try tAxiom)
     <|> tAngle
     <|> (try tArrow)
     <|> tSym
+    <|> tLParen
+    <|> tRParen
+    <|> tComma
     <|> tNumber
     <|> tId) <* (skipMany  (choice [char ' ', char '\r', char '\t'])) <*> getPosition
 
@@ -64,7 +68,16 @@ tArrow :: Parsec String st Token
 tArrow = string "->" $> TArrow
 
 tSym :: Parsec String st Token
-tSym = oneOf "FfBb+-[]" >>= \s -> return $ TSym [s]
+tSym = oneOf "+-/*[]^\\|{}#!;" >>= \s -> return $ TSym [s]
 
 tId :: Parsec String st Token
 tId = alphaNum >>= \s -> return $ TId [s]
+
+tComma :: Parsec String st Token
+tComma = char ',' $> TComma
+
+tLParen :: Parsec String st Token
+tLParen = char '(' $> TLParen
+
+tRParen :: Parsec String st Token
+tRParen = char ')' $> TRParen

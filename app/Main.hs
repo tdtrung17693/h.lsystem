@@ -2,17 +2,21 @@ module Main (main) where
 
 import Graphics.Gloss ( white, display, Display(InWindow) )
 import Data.List (intersperse)
-import Parser (Atom (Id, Symb))
-import Options.Applicative (Parser, switch, auto, option, long, short, help, info, (<**>), helper, fullDesc, header, execParser, showDefault, value, strOption, argument, metavar, Alternative (some), str, ReadM, optional, strArgument)
+import Parser (Atom (..), AtomFnCall (AtomFnCall), Expr (BinOp, Number))
+import Options.Applicative (Parser, switch, auto, option, long, short, help, info, (<**>), helper, fullDesc, header, execParser, showDefault, value, strOption, metavar, strArgument)
 import Control.Monad (when)
 import Executor
-    ( exec, RunOptions(RunOptions, debugMode), RunState(debug) )
-import System.Environment
-import Data.Char (isSpace)
+    ( exec, RunOptions(RunOptions, debugMode, unitAngle), RunState(debug) )
 
-getText :: Atom -> String
-getText (Id a) = a
-getText (Symb a) = a
+getText :: AtomFnCall -> String
+getText (AtomFnCall (Atom a) args) = case args of
+    [] -> a
+    _ -> mconcat [a,"(", mconcat (intersperse "," (getExprText <$> args)),")"]
+
+getExprText :: Expr -> String
+getExprText (BinOp op op1 op2) = mconcat [getExprText op1, op, getExprText op2]
+getExprText (Number n) = show n
+getExprText _ = ""
 
 data CLIOptions = CLIOptions {
     runOptions :: RunOptions,
@@ -58,11 +62,12 @@ main = (\cliOptions -> do
     let options = runOptions cliOptions
 
     case exec source options of
-        Right (st, atoms, p) ->
-            (when (debugMode options) (
-                print (foldr (\a s->s ++ (getText a)) "" atoms)
-                >> (putStrLn (mconcat . intersperse "\n" $ (debug st)))))
-            >> display (InWindow "L-System" (500, 500) (0,0)) white p
+        Right (st, ops, atoms, p) ->
+            (when (debugMode options) (do
+                (print (mconcat (map (\s->(getText s))atoms)))
+                print (unitAngle ops)
+                (putStrLn (mconcat . intersperse "\n" $ (debug st))))
+            >> display (InWindow "L-System" (500, 500) (0,0)) white p)
         Left e -> print e) =<< execParser opts
     where opts = info (flags <**> helper)
             (fullDesc

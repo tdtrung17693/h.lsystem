@@ -1,5 +1,5 @@
 angle 120
-axiom F-G-G
+axiom F(0.2)-G(0.2)-G(0.2)
 
-F -> F-G+F+G-F
-G -> GG
+F(l) -> F(l)-G(l)+F(l)+G(l)-F(l)
+G(l) -> G(l)G(l)

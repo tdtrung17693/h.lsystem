@@ -42,7 +42,7 @@ Available options:
 
 - [x] Basic features
 - [x] Unit test
-- [ ] Parameterized rules
+- [x] Parameterized rules
 - [ ] Stochastic
 - [ ] Graphic primitives (colors, texts, arcs, etc.)
 - [ ] Animation
